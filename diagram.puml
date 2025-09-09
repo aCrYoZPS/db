@@ -46,7 +46,7 @@ class DeviceModel {
 
 class Device {
     id: varchar(36), primarykey
-    device_model_id: varchar(36), notnull,
+    device_model_id: varchar(36), notnull
     serial_number: varchar(50), notnull, unique
     equimpent_number: varchar(50), notnull
     suffix: varchar(50), notnull
@@ -67,8 +67,34 @@ class DeviceGroup {
 
 class Document{
     id: varchar(36), primarykey
+    device_id: varchar(36), notnull
+    upload_date: datetime, notnull
     file_name: varchar(255), notnull
-    device_id: varchar(36), notnull,
+    file_content: longblob, notnull
+    file_size: int, notnull
+    event_code: varchar(16)
+    event_message: varchar(255)
+}
 
+class Notification {
+    id: varchar(36), primarykey
+    user_id: varchar(36)
+    device_id: varchar(36)
+    timestamp: datetime, notnull
+    is_sent: bool, notnull
+    content: text, notnull
+}
+
+class DeviceStat {
+    id: varchar(36), primarykey
+    device_id: varchar(36), notnull, unique
+    active_since: timestamp
+    last_upload_timestamp: timestamp
+    total_file_count: int
+    total_sent_bytes: bigint
+    max_file_size: int
+    firmware_version: varchar(32)
+    windows_version: varchar(64)
+    app_version: varchar(32)
 }
 @enduml
