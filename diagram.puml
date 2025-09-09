@@ -1,0 +1,74 @@
+@startuml
+class User{
+    id: varchar(36) (uuid4), primarykey
+    name: varchar(255), notnull
+    number: varchar(255), notnull
+    country_id: varchar(36), notnull
+    role_id: varchar(36), notnull
+    email: varchar(255), unique
+}
+
+class UserDeviceGroupRelation {
+    id: varchar(36), primarykey
+    user_id: varchar(36), notnull
+    device_group_id: varchar(36), notnull
+}
+
+class Country{
+    id: varchar(36), primarykey
+    name: varchar(255), notnull
+    code_2: varchar(2), notnull
+    code_3: varchar(3), notnull
+}
+
+class Role {
+    id: varchar(36), primarykey
+    name: varchar(255), notnull
+}
+
+class Log {
+    id: varchar(36), primarykey
+    customer_id: varchar(36), notnull
+    data: text, notnull
+    timestamp: datetime, notnull
+}
+
+class DeviceType {
+    id: varchar(36), primarykey
+    name: varchar(255), notnull, unique
+}
+
+class DeviceModel {
+    id: varchar(36), primarykey
+    device_type_id: varchar(36), notnull
+    name: varchar(255) notnull
+}
+
+class Device {
+    id: varchar(36), primarykey
+    device_model_id: varchar(36), notnull,
+    serial_number: varchar(50), notnull, unique
+    equimpent_number: varchar(50), notnull
+    suffix: varchar(50), notnull
+    customer_id: varchar(36), notnull
+    enabled: bool, notnull
+}
+
+class DeviceDeviceGroupRelation {
+    id: varchar(36), primarykey
+    device_id: varchar(36), notnull
+    device_group_id: varchar(36), notnull
+}
+
+class DeviceGroup {
+    id: varchar(36), primarykey
+    name: varchar(255), notnull
+}
+
+class Document{
+    id: varchar(36), primarykey
+    file_name: varchar(255), notnull
+    device_id: varchar(36), notnull,
+
+}
+@enduml
