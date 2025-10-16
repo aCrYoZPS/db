@@ -1,95 +1,80 @@
 @startuml
+
+skinparam linetype ortho
 class User{
     id: varchar(36) (uuid4), primarykey
     name: varchar(255), notnull
-    role_id: varchar(36), notnull
+    role_id: varchar(36), notnull, foreign key 
     email: varchar(255), unique
 }
-
-User::country_id --> Country::id
-User::role_id --> Role::id
-
+User ||--|| Role
 class CustomerData {
     id: varchar(36), primarykey
-    user_id: varchar(36), unique, notnull
+    user_id: varchar(36), unique, notnull, foreign key
     customer_number, varchar(255), notnull
-    country_id: varchar(36), notnull
+    country_id: varchar(36), notnull, foreign key
 }
-
-CustomerData::user_id --> User::id
-
+CustomerData ||--|| User
+CustomerData ||--|| Country
 class UserDeviceGroupRelation {
     id: varchar(36), primarykey
-    user_id: varchar(36), notnull
-    device_group_id: varchar(36), notnull
+    user_id: varchar(36), notnull, foreign key
+    device_group_id: varchar(36), notnull, foreign key
 }
-
-UserDeviceGroupRelation::user_id -> User::id
-UserDeviceGroupRelation::device_group_id -> DeviceGroup::id
-
+UserDeviceGroupRelation }o--|| User
+UserDeviceGroupRelation }o--|| DeviceGroup
 class Country{
     id: varchar(36), primarykey
     name: varchar(255), notnull
     code_2: varchar(2), notnull
     code_3: varchar(3), notnull
 }
-
 class Role {
     id: varchar(36), primarykey
     name: varchar(255), notnull
 }
-
 class Log {
     id: varchar(36), primarykey
-    user_id: varchar(36), notnull
+    user_id: varchar(36), notnull, foreign key
     data: text, notnull
     timestamp: datetime, notnull
 }
-
-Log::user_id --> User::id
-
+Log }o--|| User
 class DeviceType {
     id: varchar(36), primarykey
     name: varchar(255), notnull, unique
 }
-
 class DeviceModel {
     id: varchar(36), primarykey
-    device_type_id: varchar(36), notnull
+    device_type_id: varchar(36), notnull, foreign key
     name: varchar(255) notnull
 }
-
-DeviceModel::device_type_id --> DeviceType::id
-
+DeviceModel ||--|| DeviceType
 class Device {
     id: varchar(36), primarykey
-    device_model_id: varchar(36), notnull
+    device_model_id: varchar(36), notnull, foreign key
     serial_number: varchar(50), notnull, unique
     equimpent_number: varchar(50), notnull
     suffix: varchar(50), notnull
-    customer_id: varchar(36), notnull
+    customer_id: varchar(36), notnull, foreign key
     enabled: bool, notnull
 }
-
-Device::device_model_id --> DeviceModel::id
-
+Device ||--|| DeviceModel
+Device }o--|| CustomerData
 class DeviceDeviceGroupRelation {
     id: varchar(36), primarykey
-    device_id: varchar(36), notnull
-    device_group_id: varchar(36), notnull
+    device_id: varchar(36), notnull, foreign key
+    device_group_id: varchar(36), notnull, foreign key
 }
-
-DeviceDeviceGroupRelation::device_id -> Device::id
-DeviceDeviceGroupRelation::device_group_id -> DeviceGroup::id
-
+DeviceDeviceGroupRelation }o--|| Device
+DeviceDeviceGroupRelation }o--|| DeviceGroup
 class DeviceGroup {
     id: varchar(36), primarykey
     name: varchar(255), notnull
 }
-
 class Document{
     id: varchar(36), primarykey
-    device_id: varchar(36), notnull
+    device_id: varchar(36), notnull, foreign key
     upload_date: datetime, notnull
     file_name: varchar(255), notnull
     file_content: longblob, notnull
@@ -97,8 +82,7 @@ class Document{
     event_code: varchar(16)
     event_message: varchar(255)
 }
-Document::device_id --> Device::id
-
+Document }o--|| Device
 class Notification {
     id: varchar(36), primarykey
     user_id: varchar(36)
@@ -107,10 +91,8 @@ class Notification {
     is_sent: bool, notnull
     content: text, notnull
 }
-
-Notification::user_id --> User::id
-Notification::device_id --> Device::id
-
+Notification }o--|| User
+Notification }o--|| Device
 class DeviceStat {
     id: varchar(36), primarykey
     device_id: varchar(36), notnull, unique
@@ -123,7 +105,5 @@ class DeviceStat {
     windows_version: varchar(64)
     app_version: varchar(32)
 }
-
-DeviceStat::device_id --> Device::id
-
+DeviceStat ||--|| Device
 @enduml
