@@ -1,129 +1,137 @@
 @startuml
-class User{
-    id: varchar(36) (uuid4), primarykey
-    name: varchar(255), notnull
-    role_id: varchar(36), notnull
-    email: varchar(255), unique
+
+entity "User" as User {
+    *id : varchar(36) (uuid4)
+    --
+    name : varchar(255)
+    role_id : varchar(36)
+    email : varchar(255)
 }
 
-User::country_id --> Country::id
-User::role_id --> Role::id
-
-class CustomerData {
-    id: varchar(36), primarykey
-    user_id: varchar(36), unique, notnull
-    customer_number, varchar(255), notnull
-    country_id: varchar(36), notnull
+entity "Country" as Country {
+    *id : varchar(36)
+    --
+    name : varchar(255)
+    code_2 : varchar(2)
+    code_3 : varchar(3)
 }
 
-CustomerData::user_id --> User::id
-
-class UserDeviceGroupRelation {
-    id: varchar(36), primarykey
-    user_id: varchar(36), notnull
-    device_group_id: varchar(36), notnull
+entity "Role" as Role {
+    *id : varchar(36)
+    --
+    name : varchar(255)
 }
 
-UserDeviceGroupRelation::user_id -> User::id
-UserDeviceGroupRelation::device_group_id -> DeviceGroup::id
-
-class Country{
-    id: varchar(36), primarykey
-    name: varchar(255), notnull
-    code_2: varchar(2), notnull
-    code_3: varchar(3), notnull
+entity "CustomerData" as CustomerData {
+    *id : varchar(36)
+    --
+    user_id : varchar(36)
+    customer_number : varchar(255)
+    country_id : varchar(36)
 }
 
-class Role {
-    id: varchar(36), primarykey
-    name: varchar(255), notnull
+entity "UserDeviceGroupRelation" as UserDeviceGroupRelation {
+    *id : varchar(36)
+    --
+    user_id : varchar(36)
+    device_group_id : varchar(36)
 }
 
-class Log {
-    id: varchar(36), primarykey
-    user_id: varchar(36), notnull
-    data: text, notnull
-    timestamp: datetime, notnull
+entity "DeviceGroup" as DeviceGroup {
+    *id : varchar(36)
+    --
+    name : varchar(255)
 }
 
-Log::user_id --> User::id
-
-class DeviceType {
-    id: varchar(36), primarykey
-    name: varchar(255), notnull, unique
+entity "Log" as Log {
+    *id : varchar(36)
+    --
+    customer_id : varchar(36)
+    data : text
+    timestamp : datetime
 }
 
-class DeviceModel {
-    id: varchar(36), primarykey
-    device_type_id: varchar(36), notnull
-    name: varchar(255) notnull
+entity "DeviceType" as DeviceType {
+    *id : varchar(36)
+    --
+    name : varchar(255)
 }
 
-DeviceModel::device_type_id --> DeviceType::id
-
-class Device {
-    id: varchar(36), primarykey
-    device_model_id: varchar(36), notnull
-    serial_number: varchar(50), notnull, unique
-    equimpent_number: varchar(50), notnull
-    suffix: varchar(50), notnull
-    customer_id: varchar(36), notnull
-    enabled: bool, notnull
+entity "DeviceModel" as DeviceModel {
+    *id : varchar(36)
+    --
+    device_type_id : varchar(36)
+    name : varchar(255)
 }
 
-Device::device_model_id --> DeviceModel::id
-
-class DeviceDeviceGroupRelation {
-    id: varchar(36), primarykey
-    device_id: varchar(36), notnull
-    device_group_id: varchar(36), notnull
+entity "Device" as Device {
+    *id : varchar(36)
+    --
+    device_model_id : varchar(36)
+    serial_number : varchar(50)
+    equimpent_number : varchar(50)
+    suffix : varchar(50)
+    customer_id : varchar(36)
+    enabled : bool
 }
 
-DeviceDeviceGroupRelation::device_id -> Device::id
-DeviceDeviceGroupRelation::device_group_id -> DeviceGroup::id
-
-class DeviceGroup {
-    id: varchar(36), primarykey
-    name: varchar(255), notnull
+entity "DeviceDeviceGroupRelation" as DeviceDeviceGroupRelation {
+    *id : varchar(36)
+    --
+    device_id : varchar(36)
+    device_group_id : varchar(36)
 }
 
-class Document{
-    id: varchar(36), primarykey
-    device_id: varchar(36), notnull
-    upload_date: datetime, notnull
-    file_name: varchar(255), notnull
-    file_content: longblob, notnull
-    file_size: int, notnull
-    event_code: varchar(16)
-    event_message: varchar(255)
-}
-Document::device_id --> Device::id
-
-class Notification {
-    id: varchar(36), primarykey
-    user_id: varchar(36)
-    device_id: varchar(36)
-    timestamp: datetime, notnull
-    is_sent: bool, notnull
-    content: text, notnull
+entity "Document" as Document {
+    *id : varchar(36)
+    --
+    device_id : varchar(36)
+    upload_date : datetime
+    file_name : varchar(255)
+    file_content : longblob
+    file_size : int
+    event_code : varchar(16)
+    event_message : varchar(255)
 }
 
-Notification::user_id --> User::id
-Notification::device_id --> Device::id
-
-class DeviceStat {
-    id: varchar(36), primarykey
-    device_id: varchar(36), notnull, unique
-    active_since: timestamp
-    last_upload_timestamp: timestamp
-    total_file_count: int
-    total_sent_bytes: bigint
-    max_file_size: int
-    firmware_version: varchar(32)
-    windows_version: varchar(64)
-    app_version: varchar(32)
+entity "Notification" as Notification {
+    *id : varchar(36)
+    --
+    user_id : varchar(36)
+    device_id : varchar(36)
+    timestamp : datetime
+    is_sent : bool
+    content : text
 }
 
-DeviceStat::device_id --> Device::id
+entity "DeviceStat" as DeviceStat {
+    *id : varchar(36)
+    --
+    device_id : varchar(36)
+    active_since : timestamp
+    last_upload_timestamp : timestamp
+    total_file_count : int
+    total_sent_bytes : bigint
+    max_file_size : int
+    firmware_version : varchar(32)
+    windows_version : varchar(64)
+    app_version : varchar(32)
+}
+
+User }o--|| Role : role_id
+CustomerData ||--|| User : user_id
+CustomerData }o--|| Country : country_id
+UserDeviceGroupRelation }o--|| User : user_id
+UserDeviceGroupRelation }o--|| DeviceGroup : device_group_id
+Log }o--|| CustomerData : customer_id
+DeviceModel }o--|| DeviceType : device_type_id
+Device }o--|| DeviceModel : device_model_id
+Device }o--|| CustomerData : customer_id
+DeviceDeviceGroupRelation }o--|| Device : device_id
+DeviceDeviceGroupRelation }o--|| DeviceGroup : device_group_id
+Document }o--|| Device : device_id
+Notification }o--o| User : user_id
+Notification }o--o| Device : device_id
+DeviceStat ||--|| Device : device_id
 
 @enduml
