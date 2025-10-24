@@ -22,7 +22,7 @@
     "port": 5432,
     "username": "postgres",
     "password": "admin",
-    "database": "labs",
+    "database": "db_labs",
     "connTimeoutSecs": 10,
     "disableConnection": false,
     "allowStatementExecutionsAgainst": ["127.0.0.1/*", "localhost/*"]
