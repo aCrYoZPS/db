@@ -31,3 +31,29 @@ WHERE device_stats.active_since IS NOT NULL
     device_stats.last_offline_notification IS NULL
         OR device_stats.last_offline_notification <= '2025-11-08'
     );
+
+
+WITH subquery AS (
+    SELECT
+        notification,
+        changed_on,
+        time_of_change,
+        ROW_NUMBER() OVER (
+            PARTITION BY notification
+            ORDER BY changed_on DESC
+        ) AS rownum
+    FROM service_xpress_data
+    WHERE notification IN (<list_of_notifications>)
+)
+SELECT
+    subquery.notification,
+    subquery.changed_on,
+    subquery.time_of_change
+FROM subquery
+WHERE subquery.rownum = 1;
+
+
+SELECT client_reports.*, device_stats.*
+FROM client_reports
+LEFT OUTER JOIN device_stats on device_stats.device_id = client_reports.device_id
+WHERE client_reports.email_sent = false;
