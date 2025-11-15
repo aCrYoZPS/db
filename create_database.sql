@@ -5,24 +5,17 @@ CREATE TABLE IF NOT EXISTS countries (
     code_3 VARCHAR(3) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE IF NOT EXISTS admins(
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    role_id UUID NOT NULL REFERENCES roles (id),
     email VARCHAR(255) UNIQUE,
     country_id UUID REFERENCES countries (id)
-);
-
-CREATE TABLE IF NOT EXISTS customer_data (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL UNIQUE REFERENCES users (id),
-    customer_number VARCHAR(255) NOT NULL,
-    country_id UUID NOT NULL REFERENCES countries (id)
 );
 
 CREATE TABLE IF NOT EXISTS device_types (
@@ -42,7 +35,7 @@ CREATE TABLE IF NOT EXISTS devices (
     serial_number VARCHAR(50) NOT NULL UNIQUE,
     equimpent_number VARCHAR(50) NOT NULL,
     suffix VARCHAR(50) NOT NULL,
-    customer_id UUID NOT NULL REFERENCES customer_data (id),
+    user_id UUID NOT NULL REFERENCES users (id),
     enabled BOOLEAN NOT NULL
 );
 
@@ -103,3 +96,22 @@ CREATE TABLE IF NOT EXISTS device_stats (
     app_version VARCHAR(32)
 );
 
+CREATE TABLE IF NOT EXISTS regions (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) not null
+);
+
+
+create type notification_type as enum ('all', 'offline', 'none');
+
+CREATE TABLE customer_contacts
+(
+    id            UUID PRIMARY KEY,
+    customer_id   UUID              NOT NULL,
+    email         VARCHAR(255)      NOT NULL,
+    notifications notification_type NOT NULL,
+    CONSTRAINT customer_id_fk
+        foreign key (customer_id)
+            references customers (id)
+            on delete cascade
+)
