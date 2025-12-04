@@ -24,30 +24,28 @@ BEGIN
     where device_id = new.device_id;
 end;
 
-
-CREATE PROCEDURE create_customer_contact(IN customer_id_param CHAR(36), IN email_param VARCHAR(255),
+CREATE PROCEDURE create_customer_contact(IN contact_id CHAR(36), IN customer_id_param CHAR(36),
+                                         IN email_param VARCHAR(255),
                                          IN notifications_param VARCHAR(255))
 BEGIN
-    INSERT INTO customer_contacts VALUES (UUID(), customer_id_param, email_param, notifications_param);
+    INSERT INTO customer_contact_data VALUES (contact_id, customer_id_param, email_param, notifications_param);
 end;
 
-CREATE PROCEDURE create_customer(IN customer_name VARCHAR(255), IN customer_number VARCHAR(255),
+CREATE PROCEDURE create_customer(IN new_customer_id CHAR(36), IN customer_name VARCHAR(255),
+                                 IN customer_number VARCHAR(255),
                                  in country_id_param CHAR(36), IN email_param VARCHAR(255),
                                  IN notifications_param VARCHAR(255))
 begin
-    DECLARE new_customer_id CHAR(36);
-    set new_customer_id = UUID();
     insert into customers
     values (new_customer_id, customer_name, customer_number, country_id_param, 'PROCEDURE', NOW());
-    insert into customer_contacts values (UUID(), new_customer_id, email_param, notifications_param);
+    insert into customer_contact_data values (UUID(), new_customer_id, email_param, notifications_param);
 end;
 
-CREATE PROCEDURE create_device(IN machine_type_param CHAR(36), IN machine_model_id_param CHAR(36),
+CREATE PROCEDURE create_device(IN new_device_id CHAR(36), IN machine_type_param CHAR(36),
+                               IN machine_model_id_param CHAR(36),
                                in serial_number_param VARCHAR(255), IN equipment_number_param VARCHAR(255),
                                IN suffix_param VARCHAR(255), IN customer_id_param CHAR(36))
 begin
-    DECLARE new_device_id CHAR(36);
-    set new_device_id = UUID();
     insert into devices
     values (new_device_id, machine_type_param, machine_model_id_param, serial_number_param, equipment_number_param,
             suffix_param, customer_id_param, FALSE, 'API', NOW());
@@ -126,12 +124,14 @@ create trigger trg_after_update_devices
 begin
     DECLARE audit_data VARCHAR(1024);
     call create_device_audit_data(new.id, audit_data);
-
     update audit_log
     set affected_item_data_after = audit_data
     where affected_item = old.id
       and action_type = 'UPDATE'
       and affected_item_data_after is NULL;
-end;
 
+    update device_stats
+    set active_since=IFNULL(active_since, NOW())
+    where device_id = old.id;
+end;
 
