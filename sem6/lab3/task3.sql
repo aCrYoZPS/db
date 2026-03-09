@@ -83,13 +83,16 @@ BEGIN
         FROM (SELECT name,
                      type,
                      SUM(ORA_HASH(
-                         -- Normalize: strip leading+trailing whitespace, collapse internal runs
                              REGEXP_REPLACE(
-                                     TRIM(BOTH ' ' FROM
-                                          REPLACE(REPLACE(REPLACE(text, CHR(9), ' '), CHR(13), ''), CHR(10), '')
-                                     ),
-                                     ' {2,}', ' '
-                             ) || CHR(0) || TO_CHAR(line)
+                                     TRIM(REPLACE(REPLACE(REPLACE(REPLACE(
+                                                                          UPPER(text),
+                                                                          '"',
+                                                                          ''),
+                                                                  CHR(9), ' '),
+                                                          CHR(13), ''),
+                                                  CHR(10), '')),
+                                     ' {2,}', ' ')
+                                 || CHR(0) || TO_CHAR(line)
                          )) AS src_hash
               FROM all_source
               WHERE owner = v_dev
@@ -101,11 +104,14 @@ BEGIN
                      type,
                      SUM(ORA_HASH(
                              REGEXP_REPLACE(
-                                     TRIM(BOTH ' ' FROM
-                                          REPLACE(REPLACE(REPLACE(text, CHR(9), ' '), CHR(13), ''), CHR(10), '')
-                                     ),
-                                     ' {2,}', ' '
-                             ) || CHR(0) || TO_CHAR(line)
+                                     TRIM(REPLACE(REPLACE(REPLACE(REPLACE(
+                                                                          UPPER(text),
+                                                                          '"', ''),
+                                                                  CHR(9), ' '),
+                                                          CHR(13), ''),
+                                                  CHR(10), '')),
+                                     ' {2,}', ' ')
+                                 || CHR(0) || TO_CHAR(line)
                          )) AS src_hash
               FROM all_source
               WHERE owner = v_prod
