@@ -3,6 +3,7 @@ from collections import Counter
 from datetime import datetime
 import random
 import time
+import threading
 
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import OperationFailure
@@ -515,7 +516,7 @@ def buy_with_tx(product_id: str, user_id: int, results: list, idx: int):
             result = db["stock"].find_one_and_update(
                 {"_id": product_id, "quantity": {"$gt": 0}},
                 {"$inc": {"quantity": -1},
-                 "$set": {"updated_at": datetime.utcnow()}},
+                 "$set": {"updated_at": datetime.now()}},
                 return_document=True,
             )
             if result is None:
@@ -531,8 +532,7 @@ def demo_isolation():
 
     pid = str(db["products"].find_one({}, {"_id": 1})["_id"])
 
-    # ── 4a: Гонка БЕЗ транзакций ─────────────────────────────────────────────
-    print("\n--- 4a) WITHOUT transactions (race condition) ---")
+    print("\n--- WITHOUT transactions (race condition) ---")
     setup_last_item(pid, quantity=1)
 
     results_no_tx = [None, None]
@@ -548,14 +548,13 @@ def demo_isolation():
 
     if all(r["status"] == "purchased" for r in results_no_tx):
         if final["quantity"] < 0:
-            print("  ⚠  RACE CONDITION: stock went negative — OVERSOLD!")
+            print("  RACE CONDITION: stock went negative — OVERSOLD!")
         else:
-            print("  ⚠  Both purchased (lucky ordering this run — race still possible)")
+            print("  Both purchased (lucky ordering this run — race still possible)")
     else:
         print("  (One thread lost the race — but not guaranteed without transactions)")
 
-    # ── 4b: С транзакцией — WriteConflict защищает ───────────────────────────
-    print("\n--- 4b) WITH transactions (WriteConflict protection) ---")
+    print("\n--- WITH transactions (WriteConflict protection) ---")
     setup_last_item(pid, quantity=1)
 
     results_tx = [None, None]
@@ -571,14 +570,15 @@ def demo_isolation():
 
     purchased = sum(1 for r in results_tx if r and "purchased" in r.get("status", ""))
     if purchased == 1 and final_tx["quantity"] == 0:
-        print("  ✔ CORRECT: exactly 1 purchase, stock = 0, no oversell")
+        print("  CORRECT: exactly 1 purchase, stock = 0, no oversell")
     print()
 
 
 def main():
     # run_task1()
     # compare_live_vs_materialized()
-    demo_warehouse_transfer()
+    # demo_warehouse_transfer()
+    demo_isolation()
 
 
 if __name__ == '__main__':
